@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const fileParser = require('express-multipart-file-parser');
 
 const health = require('./health');
+const task = require('./task');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // entry points
+app.use("/task", task);
 app.get("/", health);
 
 exports.mainApp = app;
