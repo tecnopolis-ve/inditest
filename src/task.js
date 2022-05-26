@@ -1,8 +1,9 @@
 const express = require("express");
-const path = require("path");
 const sharp = require("sharp");
 const crypto = require("crypto");
 const fs = require("fs");
+const getFilenameAndExtension = require("../utils/utils").getFilenameAndExtension;
+const getImageInfo = require("../utils/utils").getImageInfo;
 
 const router = express.Router();
 const Task = require("../models").Task;
@@ -18,10 +19,6 @@ const checkFile = (req, res, next) => {
     }
 
     next();
-};
-
-const getFilenameAndExtension = (pathfilename) => {
-    return [path.parse(pathfilename).name, path.parse(pathfilename).ext];
 };
 
 const resize = async (image, width) => {
@@ -66,11 +63,6 @@ const resize = async (image, width) => {
     } catch (error) {
         console.log("error", error);
     }
-};
-
-const getImageInfo = async (image) => {
-    const readImg = sharp(image);
-    return await readImg.metadata();
 };
 
 const getTasks = async (req, res) => {
