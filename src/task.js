@@ -10,11 +10,11 @@ const Image = require("../models").Image;
 
 const checkFile = (req, res, next) => {
     if (!req.files || Object.keys(req.files).length === 0) {
-        return res.status(400).send("No se detectó ninguna imagen");
+        return res.status(400).send("No image was uploaded");
     }
 
     if (!req.files[0].mimetype.match(/^image/)) {
-        return res.status(400).send("No es una imagen válida");
+        return res.status(400).send("Not a valid image");
     }
 
     next();
@@ -25,7 +25,7 @@ const getFilenameAndExtension = (pathfilename) => {
 };
 
 const resize = async (image, width) => {
-    const fileProperties = getFilenameAndExtension(image);
+    const fileProperties = getFilenameAndExtension(image.path);
     const outputPath = `./output/${fileProperties[0]}/${width}`;
 
     try {
@@ -33,7 +33,7 @@ const resize = async (image, width) => {
             fs.mkdirSync(outputPath, { recursive: true });
         }
 
-        const rawImage = await sharp(image)
+        const rawImage = await sharp(image.path)
             .resize({
                 width,
             })
@@ -46,7 +46,22 @@ const resize = async (image, width) => {
         saveFile.write(rawImage);
         saveFile.end();
         saveFile.on("finish", async function () {
-            console.log("ok");
+            const imageInfo = await getImageInfo(rawImage);
+            console.log(imageInfo);
+            await Task.update(
+                { processed: true },
+                {
+                    where: {
+                        id: image.id,
+                        processed: false,
+                    },
+                }
+            );
+            await Image.create({
+                path: toFile,
+                resolution: `${imageInfo.width}x${imageInfo.height}`,
+                md5,
+            });
         });
     } catch (error) {
         console.log("error", error);
@@ -77,7 +92,7 @@ const getTask = async (req, res) => {
         return res.send(task);
     }
 
-    res.status(404).send("Imagen no encontrada");
+    res.status(404).send("Image not found");
 };
 
 const postProcessImages = async (req, res) => {
@@ -85,20 +100,22 @@ const postProcessImages = async (req, res) => {
         where: { processed: false },
     });
 
-    const resolutions = [800, 1024];
-    let newTasks = [];
+    if (tasks.length) {
+        const resolutions = [800, 1024];
+        let newTasks = [];
 
-    for (const i in tasks) {
-        for (const j in resolutions) {
-            newTasks.push(resize(tasks[i].path, resolutions[j]));
+        for (const i in tasks) {
+            for (const j in resolutions) {
+                newTasks.push(resize(tasks[i], resolutions[j]));
+            }
         }
+
+        Promise.all([newTasks]).then((values) => {
+            res.send("postProcessImages");
+        });
+    } else {
+        res.send(`There is nothing to process.`);
     }
-
-    Promise.all([newTasks]).then((values) => {
-        console.log("All done");
-    });
-
-    res.send("postProcessImages");
 };
 
 const postTask = async (req, res) => {
@@ -133,7 +150,7 @@ const postTask = async (req, res) => {
             resolution: `${imageInfo.width}x${imageInfo.height}`,
             md5,
         });
-        res.send(`Imagen cargada correctamente`);
+        res.send(`Image uploaded!`);
     });
 };
 
