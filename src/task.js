@@ -1,12 +1,10 @@
 const express = require("express");
-const sharp = require("sharp");
-const crypto = require("crypto");
 const fs = require("fs");
+const crypto = require("crypto");
+const router = express.Router();
 
 const postProcessImages = require("../utils/utils").postProcessImages;
 const getImageInfo = require("../utils/utils").getImageInfo;
-
-const router = express.Router();
 const Task = require("../models").Task;
 const Image = require("../models").Image;
 

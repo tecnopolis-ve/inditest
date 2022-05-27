@@ -1,6 +1,10 @@
 const sharp = require("sharp");
 const path = require("path");
-const fs = require("fs").promises;
+const fs = require("fs");
+const crypto = require("crypto");
+
+const Task = require("../models").Task;
+const Image = require("../models").Image;
 
 const getFilenameAndExtension = (pathfilename) => {
     return [path.parse(pathfilename).name, path.parse(pathfilename).ext];
@@ -9,6 +13,23 @@ const getFilenameAndExtension = (pathfilename) => {
 const getImageInfo = async (image) => {
     const readImg = sharp(image);
     return await readImg.metadata();
+};
+
+const persistResizedImage = async (image, imageInfo) => {
+    await Task.update(
+        { processed: true },
+        {
+            where: {
+                id: image.id,
+                processed: false,
+            },
+        }
+    );
+    await Image.create({
+        path: imageInfo.toFile,
+        resolution: `${imageInfo.width}x${imageInfo.height}`,
+        md5: imageInfo.md5,
+    });
 };
 
 const resizeImage = async (image, width) => {
@@ -34,20 +55,7 @@ const resizeImage = async (image, width) => {
         saveFile.end();
         saveFile.on("finish", async function () {
             const imageInfo = await getImageInfo(rawImage);
-            await Task.update(
-                { processed: true },
-                {
-                    where: {
-                        id: image.id,
-                        processed: false,
-                    },
-                }
-            );
-            await Image.create({
-                path: toFile,
-                resolution: `${imageInfo.width}x${imageInfo.height}`,
-                md5,
-            });
+            await persistResizedImage(image, { toFile, md5, ...imageInfo });
         });
     } catch (error) {
         console.log("error", error);
