@@ -22,7 +22,7 @@
 						{
 							"key": "file",
 							"type": "file",
-							"src": "/home/manuel/Imágenes/EX9UulQWoAUtsCh.jpeg"
+							"src": "/home/manuel/Imágenes/foto.png"
 						}
 					],
 					"options": {
@@ -45,53 +45,19 @@
 			"response": []
 		},
 		{
-			"name": "Process Image local",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [],
-					"options": {
-						"raw": {
-							"language": "text"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:3000/task/process",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"task",
-						"process"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get image local",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/image/2",
+					"raw": "localhost:3000/image/50",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
 						"image",
-						"2"
+						"50"
 					]
 				}
 			},
@@ -103,14 +69,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/image/2",
+					"raw": "localhost:3000/image",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"image",
-						"2"
+						"image"
 					]
 				}
 			},
