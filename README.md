@@ -30,9 +30,9 @@ This endpoint returns a image with a specific id
 
 **[POST] http://localhost:3000/task**
 
-This endpoint receives an image via upload, after the image was uploaded, this what will happen:
+This endpoint receives an image via upload, after the image was uploaded, this what will happen next:
 
-1. The original file is stored in the server.
+1. The original file is stored in the server and its information (true size, md5 checksum) is stored in the satabase
 2. Two new images (800px and 1024px wide) are created and its information (true size, md5 checksum) is stored in the database for later consumiption.
 
 ---
