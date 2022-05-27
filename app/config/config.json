@@ -2,8 +2,8 @@
     "development": {
         "username": "root",
         "password": "000000",
-        "database": "inditest_db",
-        "host": "localhost",
+        "database": "inditest",
+        "host": "node-mysql",
         "port": 3306,
         "dialect": "mysql"
     }
