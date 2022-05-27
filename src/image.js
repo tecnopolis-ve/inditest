@@ -1,6 +1,6 @@
 const express = require("express");
-const fs = require("fs").promises;
 const router = express.Router();
+
 const Image = require("../models").Image;
 
 const getImage = async (req, res) => {
