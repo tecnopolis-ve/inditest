@@ -1,12 +1,12 @@
 # Inditex node test (inditest)
 
-## Getting started
+## Prerequisites
 
-Important: This projects requires at least Node.js >= 12.13.0 due `sharp` lib specific requirements.
+You must have installed docker and docker-compose.
 
 ## Install
 
-Clone this repo and run `npm i`
+Clone the repo and run `docker-compose up`
 
 ## Run
 
