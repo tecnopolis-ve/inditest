@@ -4,22 +4,18 @@
 
 You must have installed docker and docker-compose.
 
-## Install
+### Install
 
-Clone the repo and run `docker-compose up`
+Clone the repo and run `docker-compose up` it may take a few minutes to build and prepare the environment.
 
-## Run
+### Database
 
-To start the app just execute `npm run start`
+You have to dump the sql file available in the repo inside a freshly created database called `inditest_db`
 
-## Test
+### Run
 
-This project includes some test written in jest.
+Open the url http://localhost:3000
 
-`npm run test` will do the magic.
+## Resources
 
-## Misc
-
-### Activate nvm
-
-`nvm use 16.14.0`
+You have available in this repo a postman collection for your convenience.
