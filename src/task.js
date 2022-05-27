@@ -2,7 +2,8 @@ const express = require("express");
 const sharp = require("sharp");
 const crypto = require("crypto");
 const fs = require("fs");
-const getFilenameAndExtension = require("../utils/utils").getFilenameAndExtension;
+const getFilenameAndExtension =
+    require("../utils/utils").getFilenameAndExtension;
 const getImageInfo = require("../utils/utils").getImageInfo;
 
 const router = express.Router();
@@ -44,7 +45,6 @@ const resize = async (image, width) => {
         saveFile.end();
         saveFile.on("finish", async function () {
             const imageInfo = await getImageInfo(rawImage);
-            console.log(imageInfo);
             await Task.update(
                 { processed: true },
                 {
@@ -62,6 +62,7 @@ const resize = async (image, width) => {
         });
     } catch (error) {
         console.log("error", error);
+        throw Error(error);
     }
 };
 
@@ -87,27 +88,15 @@ const getTask = async (req, res) => {
     res.status(404).send("Image not found");
 };
 
-const postProcessImages = async (req, res) => {
-    const tasks = await Task.findAll({
-        where: { processed: false },
-    });
+const postProcessImages = async (task) => {
+    const resolutions = [800, 1024];
+    let newTasks = [];
 
-    if (tasks.length) {
-        const resolutions = [800, 1024];
-        let newTasks = [];
-
-        for (const i in tasks) {
-            for (const j in resolutions) {
-                newTasks.push(resize(tasks[i], resolutions[j]));
-            }
-        }
-
-        Promise.all([newTasks]).then((values) => {
-            res.send("postProcessImages");
-        });
-    } else {
-        res.send(`There is nothing to process.`);
+    for (const j in resolutions) {
+        newTasks.push(resize(task, resolutions[j]));
     }
+
+    return Promise.all([newTasks]);
 };
 
 const postTask = async (req, res) => {
@@ -118,32 +107,38 @@ const postTask = async (req, res) => {
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath);
         }
+
+        uploadedFile = req.files[0];
+        uploadPath = uploadPath + uploadedFile.originalname;
+
+        const saveFile = fs.createWriteStream(uploadPath);
+
+        saveFile.write(uploadedFile.buffer);
+        saveFile.end();
+        saveFile.on("finish", async function () {
+            const imageInfo = await getImageInfo(uploadedFile.buffer);
+            const md5 = crypto
+                .createHash("md5")
+                .update(uploadedFile.buffer)
+                .digest("hex");
+
+            const task = await Task.create({
+                path: uploadPath,
+                status: "RAW",
+                process: false,
+            });
+            await Image.create({
+                path: uploadPath,
+                resolution: `${imageInfo.width}x${imageInfo.height}`,
+                md5,
+            });
+            await postProcessImages(task);
+            res.send(`Image uploaded!`);
+        });
     } catch (error) {
         console.log("error", error);
+        res.status(500).send(`Something went wrong!`);
     }
-
-    uploadedFile = req.files[0];
-    uploadPath = uploadPath + uploadedFile.originalname;
-
-    const saveFile = fs.createWriteStream(uploadPath);
-
-    saveFile.write(uploadedFile.buffer);
-    saveFile.end();
-    saveFile.on("finish", async function () {
-        const imageInfo = await getImageInfo(uploadedFile.buffer);
-        const md5 = crypto
-            .createHash("md5")
-            .update(uploadedFile.buffer)
-            .digest("hex");
-
-        await Task.create({ path: uploadPath, status: "RAW", process: false });
-        await Image.create({
-            path: uploadPath,
-            resolution: `${imageInfo.width}x${imageInfo.height}`,
-            md5,
-        });
-        res.send(`Image uploaded!`);
-    });
 };
 
 router.get("/", getTasks);
