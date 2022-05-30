@@ -59,7 +59,7 @@ const resizeImage = async (image, width) => {
         });
     } catch (error) {
         console.log("error", error);
-        throw Error(error);
+        throw new Error(error);
     }
 };
 
